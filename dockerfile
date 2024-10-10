@@ -37,15 +37,15 @@ ENV LC_ALL C.UTF-8
 ENV ROS_DISTRO noetic
 
 # install ros packages
-#RUN apt-get update && apt-get install -y ros-noetic-realsense2-camera 
+RUN apt-get update && apt-get install -y ros-noetic-realsense2-camera 
 
 
 # install realsense ros from source
 # This is important to use Intel realsense d405 
-WORKDIR /home/ros_ws/src 
-RUN apt-get update && git clone --branch ros1-legacy https://github.com/IntelRealSense/realsense-ros && \
-    sed -i '37d' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h && \
-    awk 'NR==37{print "const uint16_t RS405_PID        = 0x0B5B; // DS5U"}1' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h > temp.txt && mv temp.txt /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h
+# WORKDIR /home/ros_ws/src 
+# RUN apt-get update && git clone --branch ros1-legacy https://github.com/IntelRealSense/realsense-ros && \
+#     sed -i '37d' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h && \
+#     awk 'NR==37{print "const uint16_t RS405_PID        = 0x0B5B; // DS5U"}1' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h > temp.txt && mv temp.txt /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h
 # End Ros Install
 
 #install catkin
