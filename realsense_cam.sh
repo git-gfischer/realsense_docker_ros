@@ -1,0 +1,2 @@
+source devel/setup.bash
+roslaunch realsense2_camera rs_camera.launch color_width:=$3 color_height:=$4 color_fps:=30 depth_width:=$3 depth_height:=$4 depth_fps:=30 align_depth:=True serial_no:="$1" camera:="$2"
