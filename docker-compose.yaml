@@ -22,3 +22,24 @@ services:          # 1 service = 1 container.
     privileged: true
     tty: true
     command: bash /home/realsense_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT
+
+  enumerate_devices:
+    image: "realsense_ros:latest"       # image name with the version
+    container_name: Realsense_enumerate_devices
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      ROS_MASTER_URI: $ROS_URI
+      ROS_IP: $DROS_IP
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+    network_mode: "host"
+    privileged: true
+    tty: true
+    command: rs-enumerate-devices
