@@ -26,3 +26,8 @@ You can have multiple environment files, one for each camera.
 ```
 sudo docker compose --env-file <.ENV_FILE> up realsense_camera -d
 ```
+## Run Enumerate Devices
+To check the serial number and other information about the connected cameras, run
+```
+sudo docker compose run enumerate_devices
+```
