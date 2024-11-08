@@ -42,10 +42,10 @@ RUN apt-get update && apt-get install -y ros-noetic-realsense2-camera
 
 # install realsense ros from source
 # This is important to use Intel realsense d405 
-# WORKDIR /home/ros_ws/src 
-# RUN apt-get update && git clone --branch ros1-legacy https://github.com/IntelRealSense/realsense-ros && \
-#     sed -i '37d' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h && \
-#     awk 'NR==37{print "const uint16_t RS405_PID        = 0x0B5B; // DS5U"}1' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h > temp.txt && mv temp.txt /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h
+WORKDIR /home/ros_ws/src 
+RUN apt-get update && git clone --branch ros1-legacy https://github.com/IntelRealSense/realsense-ros && \
+    sed -i '37d' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h && \
+    awk 'NR==37{print "const uint16_t RS405_PID        = 0x0B5B; // DS5U"}1' /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h > temp.txt && mv temp.txt /home/ros_ws/src/realsense-ros/realsense2_camera/include/realsense2_camera/constants.h
 # End Ros Install
 
 #install catkin
@@ -56,7 +56,8 @@ RUN apt update && \
     apt-get install -y python3-catkin-tools && \
     pip3 install -U catkin_tools
 
-COPY realsense_cam.sh /home/realsense_cam.sh
+COPY realsense_d400_cam.sh /home/realsense_d400_cam.sh
+COPY realsense_t254_cam.sh /home/realsense_t265_cam.sh
 
 RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 RUN echo "export PYTHONPATH=${PYTHONPATH}:/home/ros_ws/.venv/lib/python3.8/site-packages" >> ~/.bashrc

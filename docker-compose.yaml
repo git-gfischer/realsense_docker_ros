@@ -2,9 +2,9 @@
 version: "3"
 # Use the keyword 'services' to start to define services.
 services:          # 1 service = 1 container.
-  realsense_camera:
+  d435:
     image: "realsense_ros:latest"       # image name with the version
-    container_name: Realsense_Camera
+    container_name: Realsense_Camera_d435
     environment:
       DISPLAY: $DISPLAY
       PATH: $PATH
@@ -21,7 +21,49 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT
+    command: bash /home/realsense_d400_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT
+
+  d405:
+    image: "realsense_ros:latest"       # image name with the version
+    container_name: Realsense_Camera_d405
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      ROS_MASTER_URI: $ROS_URI
+      ROS_IP: $DROS_IP
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+    network_mode: "host"
+    privileged: true
+    tty: true
+    command: bash /home/realsense_d400_cam.sh $D405_SN $D405_NAME $D405_WIDTH $D405_HEIGHT
+
+  t265:
+    image: "realsense_ros:latest"       # image name with the version
+    container_name: Realsense_Camera_t265
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      ROS_MASTER_URI: $ROS_URI
+      ROS_IP: $DROS_IP
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+    network_mode: "host"
+    privileged: true
+    tty: true
+    command: bash /home/realsense_d435_cam.sh $T265_SN $T265_NAME
 
   enumerate_devices:
     image: "realsense_ros:latest"       # image name with the version
