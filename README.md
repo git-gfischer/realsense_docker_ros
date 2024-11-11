@@ -21,6 +21,7 @@ D435_SN=134322074149 (Change this to your camera)
 D435_WIDTH=640
 D435_HEIGHT=480
 D435_NAME=realsense/front/camera
+POINTCLOUD=False
 ```
 You can have multiple environment files, one for each camera.
 
