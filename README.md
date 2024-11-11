@@ -24,7 +24,7 @@ D435_NAME=realsense/front/camera
 ```
 You can have multiple environment files, one for each camera.
 
-### t254 environment file
+### t265 environment file
 Than add the following info for Env file if you are running a D435 camera
 ```
 ROS_URI=http://localhost:11311
