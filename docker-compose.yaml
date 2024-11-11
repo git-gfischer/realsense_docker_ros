@@ -63,7 +63,7 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d435_cam.sh $T265_SN $T265_NAME
+    command: bash /home/realsense_t265_cam.sh $T265_SN $T265_NAME
 
   enumerate_devices:
     image: "realsense_ros:latest"       # image name with the version
