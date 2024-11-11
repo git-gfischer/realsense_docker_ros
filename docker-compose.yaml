@@ -4,7 +4,7 @@ version: "3"
 services:          # 1 service = 1 container.
   d435:
     image: "realsense_ros:latest"       # image name with the version
-    container_name: Realsense_Camera_d435
+    #container_name: Realsense_Camera_d435
     environment:
       DISPLAY: $DISPLAY
       PATH: $PATH
@@ -25,7 +25,7 @@ services:          # 1 service = 1 container.
 
   d405:
     image: "realsense_ros:latest"       # image name with the version
-    container_name: Realsense_Camera_d405
+    #container_name: Realsense_Camera_d405
     environment:
       DISPLAY: $DISPLAY
       PATH: $PATH
@@ -46,7 +46,7 @@ services:          # 1 service = 1 container.
 
   t265:
     image: "realsense_ros:latest"       # image name with the version
-    container_name: Realsense_Camera_t265
+    #container_name: Realsense_Camera_t265
     environment:
       DISPLAY: $DISPLAY
       PATH: $PATH
@@ -63,7 +63,7 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d435_cam.sh $T265_SN $T265_NAME
+    command: bash /home/realsense_t265_cam.sh $T265_SN $T265_NAME
 
   enumerate_devices:
     image: "realsense_ros:latest"       # image name with the version
