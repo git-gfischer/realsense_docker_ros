@@ -57,7 +57,7 @@ RUN apt update && \
     pip3 install -U catkin_tools
 
 COPY realsense_d400_cam.sh /home/realsense_d400_cam.sh
-COPY realsense_t254_cam.sh /home/realsense_t265_cam.sh
+COPY realsense_t265_cam.sh /home/realsense_t265_cam.sh
 
 RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 RUN echo "export PYTHONPATH=${PYTHONPATH}:/home/ros_ws/.venv/lib/python3.8/site-packages" >> ~/.bashrc
