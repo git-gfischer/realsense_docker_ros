@@ -1,9 +1,9 @@
-# realsense_docker_ros
-This repo builds an docker image to run multiple Intel RealSense cameras with ROS-noetic
+# realsense docker ROS2 Humble in x86 Machines
+This repo builds an docker image to run multiple Intel RealSense cameras with ROS-Humble
 
 ## Build Docker Images
 ```
-sudo docker build -t realsense_ros .
+sudo docker build -t realsense_ros_humble .
 ```
 
 ## Create an enviroment file

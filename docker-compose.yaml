@@ -3,7 +3,7 @@ version: "3"
 # Use the keyword 'services' to start to define services.
 services:          # 1 service = 1 container.
   d435:
-    image: "realsense_ros:latest"       # image name with the version
+    image: "realsense_ros_humble:latest"       # image name with the version
     #container_name: Realsense_Camera_d435
     environment:
       DISPLAY: $DISPLAY
@@ -18,10 +18,11 @@ services:          # 1 service = 1 container.
       - /dev/bus/usb:/dev/bus/usb
     device_cgroup_rules:
       - 'c 189:* rmw'
+      - 'c 81:* rmw'
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d400_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINTCLOUD
+    #command: bash source 
 
   d405:
     image: "realsense_ros:latest"       # image name with the version
