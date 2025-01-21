@@ -1,4 +1,4 @@
-# realsense_docker_ros
+# realsense docker ROS Noetic for x86 Machines
 This repo builds an docker image to run multiple Intel RealSense cameras with ROS-noetic
 
 ## Build Docker Images
