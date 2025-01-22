@@ -17,7 +17,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 
 RUN apt install -y apt-transport-https
 RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" > /etc/apt/sources.list.d/librealsense.list
-RUN apt-get update && apt-get install -y librealsense2-dkms librealsense2-utils
+RUN apt-get update && apt-get install -y librealsense2-dkms librealsense2-utils librealsense2-dbg librealsense2-dev
 
 
 # install ros packages
@@ -26,11 +26,26 @@ RUN apt install -y libusb-1.0-0-dev pkg-config
 RUN apt install -y libglfw3-dev
 RUN apt install -y libssl-dev
 RUN apt-get install -y libglfw3-dev libgl1-mesa-dev libglu1-mesa
-RUN apt-get update && apt-get install -y ros-humble-realsense2-* ros-humble-librealsense2* 
+RUN apt-get update && apt-get install -y ros-humble-realsense2-* ros-humble-librealsense2*  ros-humble-realsense2-camera
 
 RUN apt-get update \
  && apt-get install -y \
-    ros-${ROS_DISTRO}-rviz2 \
+    ros-humble-rviz2 \
  && rm -rf /var/lib/apt/lists/*
 
-RUN echo "source /opt/ros/humble/local_setup.bash" >> ~/.bashrc
+COPY ./realsense_d435_cam.sh /home/realsense_d435_cam.sh
+COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
+COPY ./realsense_t265_cam.sh /home/realsense_t265_cam.sh
+
+WORKDIR /home
+RUN bash setup_udev_rules.sh
+
+#install image pipeline 
+# WORKDIR /home
+# RUN mkdir -p ros2_ws/src
+# WORKDIR /home/ros2_ws/src
+# RUN git clone https://github.com/ros-perception/image_pipeline.git
+# RUN bash /opt/ros/humble/setup.bash && colcon build
+
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+#RUN echo "source /home/ros2_ws/install/local_setup.bash" >> ~/.bashrc

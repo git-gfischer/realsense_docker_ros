@@ -1,1 +1,2 @@
-roslaunch realsense2_camera rs_t265.launch serial_no:="$1" camera:="$2"
+source ~/.bashrc && \
+ros2 launch realsense2_camera rs_launch.py serial_no:="_$1" camera_namespace:="$2"
