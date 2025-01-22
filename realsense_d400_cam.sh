@@ -1,1 +1,0 @@
-ros2 launch realsense2_camera rs_launch.py enable_rgbd:=true enable_sync:=true align_depth.enable:=true enable_color:=true enable_depth:=true enable_pointcloud:=$5 color_width:=$3 color_height:=$4 color_fps:=30 depth_width:=$3 depth_height:=$4 depth_fps:=30 align_depth:=True serial_no:="$1" camera:="$2"

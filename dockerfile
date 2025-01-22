@@ -35,10 +35,7 @@ RUN apt-get update \
 
 COPY ./realsense_d435_cam.sh /home/realsense_d435_cam.sh
 COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
-COPY ./realsense_t265_cam.sh /home/realsense_t265_cam.sh
 
-WORKDIR /home
-RUN bash setup_udev_rules.sh
 
 #install image pipeline 
 # WORKDIR /home
