@@ -2,6 +2,19 @@ FROM osrf/ros:humble-desktop
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Clean up any old broken ROS sources or keys
+RUN rm -f /etc/apt/sources.list.d/ros2-latest.list && \
+    rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Install tools and add the fresh GPG key
+RUN apt-get update && apt-get install -y curl gnupg2 lsb-release && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | \
+    gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Re-add the ROS 2 repository with correct signed-by config
+RUN echo "deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" \
+    > /etc/apt/sources.list.d/ros2-latest.list
+
 RUN apt-get update 
 # RUN apt-get full-upgrade -y
 
@@ -17,7 +30,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 
 RUN apt install -y apt-transport-https
 RUN echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" > /etc/apt/sources.list.d/librealsense.list
-RUN apt-get update && apt-get install -y librealsense2-dkms librealsense2-utils librealsense2-dbg librealsense2-dev
+RUN apt-get update && apt-get install -y librealsense2-utils librealsense2-dbg librealsense2-dev
 
 
 # install ros packages
@@ -26,7 +39,7 @@ RUN apt install -y libusb-1.0-0-dev pkg-config
 RUN apt install -y libglfw3-dev
 RUN apt install -y libssl-dev
 RUN apt-get install -y libglfw3-dev libgl1-mesa-dev libglu1-mesa
-RUN apt-get update && apt-get install -y ros-humble-realsense2-* ros-humble-librealsense2*  ros-humble-realsense2-camera
+RUN apt-get update && apt-get install -y ros-humble-realsense2-* ros-humble-librealsense2*  ros-humble-realsense2-camera ros-humble-rmw-cyclonedds-cpp
 
 RUN apt-get update \
  && apt-get install -y \

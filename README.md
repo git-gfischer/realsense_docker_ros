@@ -34,12 +34,6 @@ D405_HEIGHT=480
 D405_NAME=realsense/back
 ```
 
-## Run Ros2 network service
-In order to the nodes to communicate with each other run the following command
-```
-sudo docker compose up network_service -d
-```
-
 ## Run Realsense D435 camera
 ```
 sudo docker compose --project_name <NAME> --env-file <.ENV_FILE> up d435 -d
