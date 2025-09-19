@@ -50,6 +50,25 @@ COPY ./realsense_d435_cam.sh /home/realsense_d435_cam.sh
 COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
 
 
+
+# Install Realsense SDK from source---------------------------------------------------------
+# WORKDIR /home
+# RUN  apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE 
+# RUN  add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
+# RUN  apt-get install -y librealsense2-utils librealsense2-dev
+
+#Clone and build librealsense2
+#WORKDIR /opt
+#RUN git clone https://github.com/IntelRealSense/librealsense.git  && \
+#    cd librealsense && \
+#    mkdir build && cd build && \
+#    cmake .. -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true -DFORCE_LIBUVC=ON -DBUILD_WITH_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=all -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
+#    make -j$(nproc) && make install && ldconfig
+#
+#RUN cp /opt/librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/
+#-----------------------------------------------------------------------------------
+
+
 #install image pipeline 
 # WORKDIR /home
 # RUN mkdir -p ros2_ws/src
