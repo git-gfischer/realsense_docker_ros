@@ -1,19 +1,53 @@
-FROM osrf/ros:humble-desktop
+# default to $ROS_DISTRO; pass --build-arg ROS_DISTRO=jazzy for Jazzy
+ARG ROS_DISTRO=humble
+
+# Predefine base stages per Ubuntu; names must match "<ros>_base" below
+# Jammy base for ROS $ROS_DISTRO
+FROM ubuntu:22.04 AS humble_base     
+# Noble base for ROS Jazzy
+FROM ubuntu:24.04 AS jazzy_base      
+
+# Select the right base by ROS_DISTRO ($ROS_DISTRO_base or jazzy_base)
+FROM ${ROS_DISTRO}_base AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Clean up any old broken ROS sources or keys
-RUN rm -f /etc/apt/sources.list.d/ros2-latest.list && \
-    rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+# setup environment
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+# Do not delete this following line !!
+ARG ROS_DISTRO 
+ENV ROS_DISTRO=$ROS_DISTRO
+ENV ROS_ROOT=/opt/ros/$ROS_DISTRO
+ENV ROS_PACKAGE=ros_base
 
-# Install tools and add the fresh GPG key
-RUN apt-get update && apt-get install -y curl gnupg2 lsb-release && \
-    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | \
-    gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg
+# Common base setup
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl gnupg lsb-release locales \
+  && locale-gen en_US.UTF-8 \
+  && rm -rf /var/lib/apt/lists/*
 
-# Re-add the ROS 2 repository with correct signed-by config
-RUN echo "deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" \
-    > /etc/apt/sources.list.d/ros2-latest.list
+
+# Add ROS repo once, verify Ubuntu↔ROS mapping, then install
+RUN set -e; \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release locales && \
+    locale-gen en_US.UTF-8 && rm -rf /var/lib/apt/lists/*; \
+    . /etc/os-release; CODENAME="$VERSION_CODENAME"; \
+    case "${ROS_DISTRO}:${CODENAME}" in \
+      humble:jammy|jazzy:noble) echo "ROS ${ROS_DISTRO} on ${CODENAME}";; \
+      *) echo "Unsupported combo: ROS ${ROS_DISTRO} on ${CODENAME}"; exit 1;; \
+    esac; \
+    mkdir -p /etc/apt/keyrings; \
+    curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+      | gpg --dearmor -o /etc/apt/keyrings/ros-archive-keyring.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu ${CODENAME} main" \
+      > /etc/apt/sources.list.d/ros2.list; \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ros-${ROS_DISTRO}-desktop-full \
+      python3-rosdep python3-colcon-common-extensions && \
+    rosdep init || true; rosdep update || true; \
+    echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /etc/bash.bashrc
 
 RUN apt-get update 
 # RUN apt-get full-upgrade -y
@@ -39,11 +73,11 @@ RUN apt install -y libusb-1.0-0-dev pkg-config
 RUN apt install -y libglfw3-dev
 RUN apt install -y libssl-dev
 RUN apt-get install -y libglfw3-dev libgl1-mesa-dev libglu1-mesa
-RUN apt-get update && apt-get install -y ros-humble-realsense2-* ros-humble-librealsense2*  ros-humble-realsense2-camera ros-humble-rmw-cyclonedds-cpp
+RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-realsense2-* ros-$ROS_DISTRO-librealsense2*  ros-$ROS_DISTRO-realsense2-camera ros-$ROS_DISTRO-rmw-cyclonedds-cpp
 
 RUN apt-get update \
  && apt-get install -y \
-    ros-humble-rviz2 \
+    ros-$ROS_DISTRO-rviz2 \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./realsense_d435_cam.sh /home/realsense_d435_cam.sh
@@ -74,7 +108,7 @@ COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
 # RUN mkdir -p ros2_ws/src
 # WORKDIR /home/ros2_ws/src
 # RUN git clone https://github.com/ros-perception/image_pipeline.git
-# RUN bash /opt/ros/humble/setup.bash && colcon build
+# RUN bash /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 #RUN echo "source /home/ros2_ws/install/local_setup.bash" >> ~/.bashrc

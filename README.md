@@ -2,8 +2,9 @@
 This repo builds an docker image to run multiple Intel RealSense cameras with ROS-Humble
 
 ## Build Docker Images
+Run the following command to build the docker image, the default ros2 version is ```humble``` but you can change by adding the flag ``` --build-arg ROS_DISTRO=jazzy``` for example.
 ```
-sudo docker build -t realsense_ros_humble .
+sudo docker build -t realsense_ros_docker .
 ```
 
 ## Create an enviroment file

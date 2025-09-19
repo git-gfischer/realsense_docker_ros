@@ -3,7 +3,7 @@ version: "3"
 # Use the keyword 'services' to start to define services.
 services:          # 1 service = 1 container.
   d435:
-    image: "realsense_ros_humble:latest"       # image name with the version
+    image: "realsense_ros_docker:latest"       # image name with the version
     #container_name: Realsense_Camera_d435
     environment:
       DISPLAY: $DISPLAY
@@ -26,7 +26,7 @@ services:          # 1 service = 1 container.
     command: bash /home/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU
 
   d405:
-    image: "realsense_ros_humble:latest"       # image name with the version
+    image: "realsense_ros_docker:latest"       # image name with the version
     #container_name: Realsense_Camera_d405
     environment:
       DISPLAY: $DISPLAY
@@ -49,7 +49,7 @@ services:          # 1 service = 1 container.
     command: bash /home/realsense_d405_cam.sh $D405_SN $D405_NAME $D405_WIDTH $D405_HEIGHT
 
   enumerate_devices:
-    image: "realsense_ros_humble:latest"       # image name with the version
+    image: "realsense_ros_docker:latest"       # image name with the version
     container_name: Realsense_enumerate_devices
     environment:
       DISPLAY: $DISPLAY
@@ -70,7 +70,7 @@ services:          # 1 service = 1 container.
     command: rs-enumerate-devices
 
   rqt_image_view:
-    image: "realsense_ros_humble:latest"       # image name with the version
+    image: "realsense_ros_docker:latest"       # image name with the version
     container_name: RQT_image_view
     environment:
       DISPLAY: $DISPLAY
