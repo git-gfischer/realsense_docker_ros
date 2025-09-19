@@ -36,12 +36,12 @@ D405_NAME=realsense/back
 
 ## Run Realsense D435 camera
 ```
-sudo docker compose --project_name <NAME> --env-file <.ENV_FILE> up d435 -d
+sudo docker compose --project-name <NAME> --env-file <.ENV_FILE> up d435 -d
 ```
 
 ## Run Realsense D405 camera
 ```
-sudo docker compose --project_name <NAME> --env-file <.ENV_FILE> up d405 -d
+sudo docker compose --project-name <NAME> --env-file <.ENV_FILE> up d405 -d
 ```
 ## Run Enumerate Devices
 To check the serial number and other information about the connected cameras, run

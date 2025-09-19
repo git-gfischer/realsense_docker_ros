@@ -23,7 +23,7 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD
+    command: bash /home/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU
 
   d405:
     image: "realsense_ros_humble:latest"       # image name with the version

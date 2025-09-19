@@ -14,4 +14,8 @@ ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            depth_module.infra_profile:="$3x$4x30" \
                                            serial_no:="_$1" \
                                            camera_namespace:="$2" \
+                                           enable_gyro:=$6 \
+                                           enable_accel:=$6 \
+                                           unite_imu_method:=linear_interpolation
+
 
