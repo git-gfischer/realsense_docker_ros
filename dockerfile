@@ -52,12 +52,12 @@ RUN set -e; \
 RUN apt-get update 
 # RUN apt-get full-upgrade -y
 
-# Utils
-RUN apt-get install -y git wget nano sudo gawk vim iputils-ping ssh byobu software-properties-common micro curl apt-transport-https tmux
-
 # Dependencies
 RUN apt-get install -y python3-opencv ca-certificates python3-dev ninja-build \
 	dirmngr gnupg2 build-essential python3-pip python3-yaml python3-tk python3-venv gnupg
+
+# Utils
+RUN apt update && apt-get install -y git wget nano sudo gawk vim iputils-ping ssh byobu software-properties-common micro curl apt-transport-https tmux
 
 RUN mkdir -p /etc/apt/keyrings && \
     curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | tee /etc/apt/keyrings/librealsense.pgp > /dev/null

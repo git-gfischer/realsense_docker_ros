@@ -1,4 +1,5 @@
 source ~/.bashrc && \
+source /opt/ros/${ROS_DISTRO}/setup.bash && \
 echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID" && \
 echo "Pointcloud enabled: $5" && \
 echo "RWM Implementation $RMW_IMPLEMENTATION" && \
