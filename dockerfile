@@ -80,8 +80,9 @@ RUN apt-get update \
     ros-$ROS_DISTRO-rviz2 \
  && rm -rf /var/lib/apt/lists/*
 
-COPY ./realsense_d435_cam.sh /home/realsense_d435_cam.sh
+COPY ./realsense_d4XX_cam.sh /home/realsense_d4XX_cam.sh
 COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
+COPY ./rgbd_collector.py /home/rgbd_collector.py
 
 
 
@@ -92,13 +93,14 @@ COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
 # RUN  apt-get install -y librealsense2-utils librealsense2-dev
 
 #Clone and build librealsense2
-#WORKDIR /opt
-#RUN git clone https://github.com/IntelRealSense/librealsense.git  && \
-#    cd librealsense && \
-#    mkdir build && cd build && \
-#    cmake .. -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true -DFORCE_LIBUVC=ON -DBUILD_WITH_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=all -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
-#    make -j$(nproc) && make install && ldconfig
-#
+WORKDIR /opt
+RUN git clone https://github.com/IntelRealSense/librealsense.git  && \
+   cd librealsense && \
+   mkdir build && cd build && \
+   cmake .. -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true -DFORCE_LIBUVC=ON -DBUILD_WITH_CUDA=OFF  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && \
+   make -j$(nproc) && make install && ldconfig
+
+RUN  apt-get update && apt-get install -y librealsense2-utils librealsense2-dev 
 #RUN cp /opt/librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/
 #-----------------------------------------------------------------------------------
 
@@ -110,5 +112,7 @@ COPY ./realsense_d405_cam.sh /home/realsense_d405_cam.sh
 # RUN git clone https://github.com/ros-perception/image_pipeline.git
 # RUN bash /opt/ros/$ROS_DISTRO/setup.bash && colcon build
 
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /root/.bashrc
 #RUN echo "source /home/ros2_ws/install/local_setup.bash" >> ~/.bashrc
+
+CMD ["bash"]

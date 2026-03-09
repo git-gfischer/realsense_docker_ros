@@ -2,7 +2,7 @@
 version: "3"
 # Use the keyword 'services' to start to define services.
 services:          # 1 service = 1 container.
-  d435:
+  d4XX:
     build:
         context: .
         dockerfile: Dockerfile
@@ -21,14 +21,22 @@ services:          # 1 service = 1 container.
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
       - /dev/bus/usb:/dev/bus/usb
-      - ./realsense_d435_cam.sh:/home/realsense_d435_cam.sh
+      - ./realsense_d4XX_cam.sh:/home/realsense_d4XX_cam.sh
     device_cgroup_rules:
       - 'c 189:* rmw'
       - 'c 81:* rmw'
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU
+    command:
+      - bash
+      - /home/realsense_d4XX_cam.sh
+      - "${D4XX_SN}"
+      - "${D4XX_NAME}"
+      - "${D4XX_WIDTH}"
+      - "${D4XX_HEIGHT}"
+      - "${POINT_CLOUD}"
+      - "${IMU}"
 
   d405:
     build:
@@ -56,7 +64,13 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: bash /home/realsense_d405_cam.sh $D405_SN $D405_NAME $D405_WIDTH $D405_HEIGHT
+    command:
+      - bash
+      - /home/realsense_d405_cam.sh
+      - "${D405_SN}"
+      - "${D405_NAME}"
+      - "${D405_WIDTH}"
+      - "${D405_HEIGHT}"
 
   enumerate_devices:
     build:
@@ -84,22 +98,21 @@ services:          # 1 service = 1 container.
     tty: true
     command: rs-enumerate-devices
 
-  rqt_image_view:
+  realsense_viewer:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         ROS_DISTRO: humble
-    image: "realsense_ros_docker:latest"       # image name with the version
-    container_name: RQT_image_view
+    image: "realsense_ros_docker:latest"
+    container_name: Realsense_viewer
     environment:
       DISPLAY: $DISPLAY
       PATH: $PATH
       NVIDIA_DRIVER_CAPABILITIES: all
       QT_X11_NO_MITSHM: 1
       ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
-    volumes: 
+    volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
       - /dev/bus/usb:/dev/bus/usb
@@ -109,4 +122,75 @@ services:          # 1 service = 1 container.
     network_mode: "host"
     privileged: true
     tty: true
-    command: ros2 run rqt_image_view rqt_image_view
+    command: realsense-viewer
+
+  rviz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ROS_DISTRO: humble
+    image: "realsense_ros_docker:latest"       # image name with the version
+    container_name: RViz
+    env_file: .ros_env
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    network_mode: "host"
+    privileged: true
+    tty: true
+    command: bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && ros2 run rviz2 rviz2"
+
+  rgbd_collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ROS_DISTRO: humble
+    image: "realsense_ros_docker:latest"
+    container_name: RGBD_collector
+    env_file: .ros_env
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    network_mode: "host"
+    privileged: true
+    tty: true
+    volumes:
+      - ./rgbd_collector.py:/home/rgbd_collector.py
+      - ./rosbags:/home/rosbags
+    depends_on:
+      - d4XX
+    command: bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && python3 /home/rgbd_collector.py"
+
+  enter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ROS_DISTRO: humble
+    image: "realsense_ros_docker:latest"
+    container_name: Realsense_enter
+    env_file: .ros_env
+    environment:
+      DISPLAY: $DISPLAY
+      PATH: $PATH
+      NVIDIA_DRIVER_CAPABILITIES: all
+      QT_X11_NO_MITSHM: 1
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - /dev/bus/usb:/dev/bus/usb
+      - ./rosbags:/home/rosbags
+    network_mode: "host"
+    privileged: true
+    tty: true
+    stdin_open: true
+    command: bash

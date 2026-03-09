@@ -2,6 +2,7 @@ source ~/.bashrc && \
 source /opt/ros/${ROS_DISTRO}/setup.bash && \
 echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID" && \
 echo "Pointcloud enabled: $5" && \
+echo "IMU enabled: $6" && \
 echo "RWM Implementation $RMW_IMPLEMENTATION" && \
 ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            enable_rgbd:=true \

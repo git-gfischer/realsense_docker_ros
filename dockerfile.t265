@@ -1,0 +1,109 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ------------------ Base setup ------------------
+RUN apt-get update && apt-get install -y \
+    lsb-release \
+    curl \
+    gnupg2 \
+    locales \
+    sudo \
+    wget \
+    git \
+    build-essential \
+    cmake \
+    libssl-dev \
+    libusb-1.0-0-dev \
+    libudev-dev \
+    pkg-config \
+    libgtk-3-dev \
+    libglfw3-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev 
+
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-pybind11 \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool
+
+RUN pip3 install -U \
+    colcon-common-extensions \
+    vcstool \
+    rosdep
+
+# Locale setup
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+
+# ------------------ ROS 2 Humble ------------------
+RUN apt update && apt install -y software-properties-common && \
+    add-apt-repository universe && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - && \
+    sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+
+RUN apt update && apt install -y ros-humble-desktop
+
+# Source ROS
+SHELL ["/bin/bash", "-c"]
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+# ------------------ RealSense library (v2.53.1) ------------------
+WORKDIR /root
+RUN git clone https://github.com/IntelRealSense/librealsense.git -b v2.53.1
+
+# Apply udev rules
+WORKDIR /root/librealsense
+RUN ./scripts/setup_udev_rules.sh
+
+# Patch script edits (for automation, we skip the GUI/manual part)
+# NOTE: the actual kernel patching is assumed to be done *on host* due to Docker kernel limitations
+RUN sed -i 's|git://|https://|' ./scripts/patch-realsense-ubuntu-lts-hwe.sh && \
+    sed -i '165,166s/^/#/' ./scripts/patch-realsense-ubuntu-lts-hwe.sh
+
+# Register custom sensor module
+RUN echo 'hid_sensor_custom' >> /etc/modules
+
+# Build librealsense
+RUN mkdir build && cd build && \
+    cmake ../ -DBUILD_EXAMPLES=false -DBUILD_GRAPHICAL_EXAMPLES=false -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc) && make install
+
+# ------------------ ROS 2 Workspace & realsense-ros ------------------
+RUN mkdir -p /root/ros2_ws/src
+WORKDIR /root/ros2_ws/src
+
+# Clone realsense-ros (v3.2.3)
+RUN git clone https://github.com/IntelRealSense/realsense-ros.git -b 3.2.3
+WORKDIR /root/ros2_ws/src/realsense-ros/realsense2_camera/include
+RUN mkdir realsense2_camera && \
+    mv *.h realsense2_camera/
+
+# Patch CMakeLists.txt and .cpp
+WORKDIR /root/ros2_ws/src/realsense-ros/realsense2_camera
+RUN sed -i '102s/2.50.0/2.53.1/' CMakeLists.txt && \
+    sed -i '137a \
+    elseif("$ENV{ROS_DISTRO}" STREQUAL "humble")\n\
+        message(STATUS "Build for ROS2 Humble")\n\
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHUMBLE")\n\
+        set(SOURCES "${SOURCES}" src/ros_param_backend_foxy.cpp)\
+    ' CMakeLists.txt && \
+    find . -type f -name '*.cpp' -exec sed -i 's|\binclude\b|include/realsense2_camera|g' {} + && \
+    find . -type f -name '*.h'   -exec sed -i 's|\binclude\b|include/realsense2_camera|g' {} + && \
+    sed -i '2060s/^#ifdef.*//;2060s/^#endif.*//' src/base_realsense_node.cpp
+
+# ------------------ Build ROS 2 node ------------------
+WORKDIR /root/ros2_ws
+RUN rosdep init && rosdep update
+RUN rosdep install --from-paths src -y --ignore-src --skip-keys=librealsense2
+
+RUN source /opt/ros/humble/setup.bash && \
+    colcon build
+
+# Source workspace
+RUN echo "source /root/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# ------------------ ENTRY ------------------
+CMD ["/bin/bash"]

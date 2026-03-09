@@ -22,6 +22,7 @@ D435_WIDTH=640
 D435_HEIGHT=480
 D435_NAME=realsense/front
 POINTCLOUD=False
+IMU=True
 ```
 You can have multiple environment files, one for each camera.
 
@@ -35,23 +36,40 @@ D405_HEIGHT=480
 D405_NAME=realsense/back
 ```
 
-## Run Realsense D435 camera
+## Run Realsense D4XX camera
 ```
-sudo docker compose --project-name <NAME> --env-file <.ENV_FILE> up d435 -d
+docker compose --env-file <.ENV_FILE> up d4XX -d
 ```
 
 ## Run Realsense D405 camera
 ```
-sudo docker compose --project-name <NAME> --env-file <.ENV_FILE> up d405 -d
+docker compose --env-file <.ENV_FILE> up d405 -d
 ```
 ## Run Enumerate Devices
 To check the serial number and other information about the connected cameras, run
 ```
-sudo docker compose run enumerate_devices
+docker compose run enumerate_devices
 ```
 
-## Run RQT image view
+## Run Realsense-viewer
+Run the following to get to realsense-viewer
+```
+docker compose up realsense-viewer
+```
+
+## Run Rviz
 To see the images from the Topics
 ```
-sudo docker compose run rqt_image_view
+xhost +
+docker compose run rviz
+```
+
+## Collect images
+```
+docker compose up rgbd_collector
+```
+
+## Enter Docker
+```
+docker compose run enter bash
 ```
