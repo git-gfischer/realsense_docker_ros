@@ -4,7 +4,7 @@ This repo builds an docker image to run multiple Intel RealSense cameras with RO
 ## Build Docker Images
 Run the following command to build the docker image, the default ros2 version is ```humble``` but you can change by adding the flag ``` --build-arg ROS_DISTRO=jazzy``` for example.
 ```
-sudo docker build -t realsense_ros_docker .
+docker build -t realsense_ros_docker .
 ```
 
 ## Create an enviroment file
@@ -38,12 +38,12 @@ D405_NAME=realsense/back
 
 ## Run Realsense D4XX camera
 ```
-docker compose --env-file <.ENV_FILE> up d4XX -d
+docker compose --env-file <.ENV_FILE> up -d d4XX
 ```
 
 ## Run Realsense D405 camera
 ```
-docker compose --env-file <.ENV_FILE> up d405 -d
+docker compose --env-file <.ENV_FILE> up -d d405
 ```
 ## Run Enumerate Devices
 To check the serial number and other information about the connected cameras, run
