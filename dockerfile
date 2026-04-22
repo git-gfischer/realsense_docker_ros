@@ -94,6 +94,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
     ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-realsense2-camera \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./realsense_d4XX_cam.sh /home/realsense_d4XX_cam.sh
@@ -109,13 +110,17 @@ RUN git clone --depth=1 https://github.com/realsenseai/librealsense.git && \
     mkdir build && cd build && \
     cmake .. \
       -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_EXAMPLES=false \
-      -DBUILD_GRAPHICAL_EXAMPLES=false \
+      -DBUILD_EXAMPLES=true \
+      -DBUILD_GRAPHICAL_EXAMPLES=true \
       -DBUILD_WITH_CUDA=false \
       -DFORCE_RSUSB_BACKEND=true && \
     make -j"$(nproc)" && \
     make install && \
     ldconfig
+
+# Install RealSense udev rules in the image (host rules are still required for USB access)
+RUN install -D -m 644 /opt/librealsense/config/99-realsense-libusb.rules \
+    /etc/udev/rules.d/99-realsense-libusb.rules
 
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc
 

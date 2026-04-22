@@ -1,2 +1,13 @@
 source ~/.bashrc && \
-ros2 launch realsense2_camera rs_launch.py initial_reset:=true enable_sync:=true align_depth.enable:=true enable_color:=true enable_depth:=true rgb_camera.color_profile:="$3x$4x30"  depth_module.depth_profile:="$3x$4x30" serial_no:="_$1" camera_namespace:="$2"
+source /opt/ros/${ROS_DISTRO}/setup.bash && \
+echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID" && \
+echo "RWM Implementation $RMW_IMPLEMENTATION" && \
+ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
+                                            enable_sync:=true \
+                                            align_depth.enable:=true \
+                                            enable_color:=true \
+                                            enable_depth:=true \
+                                            rgb_camera.color_profile:="$3x$4x30" \
+                                            depth_module.depth_profile:="$3x$4x30" \
+                                            serial_no:="_$1" \
+                                            camera_namespace:=${D405_NAME}
