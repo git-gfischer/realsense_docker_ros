@@ -64,7 +64,7 @@ echo "→ Cloning librealsense ${LIBREALSENSE_VERSION} into ${WORK_DIR}..."
 rm -rf "${WORK_DIR}"
 git clone \
   --depth 1 \
-  --branch "${LIBREALSENSE_VERSION}" \
+  --branch "master" \
   https://github.com/IntelRealSense/librealsense.git \
   "${WORK_DIR}"
 cd "${WORK_DIR}"

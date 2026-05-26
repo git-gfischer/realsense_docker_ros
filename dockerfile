@@ -51,13 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libudev-dev \
     pkg-config \
     libgtk-3-dev \
-    # Python / ROS tooling
-    python3-pip \
-    python3-colcon-common-extensions \
-    python3-colcon-mixin \
-    python3-rosdep \
-    python3-vcstool \
-    python3-flake8-docstrings \
+    v4l-utils \
     # Utilities
     curl gnupg2 lsb-release wget ca-certificates \
     usbutils \
@@ -71,6 +65,15 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
       http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" \
       > /etc/apt/sources.list.d/ros2.list
  
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Python / ROS tooling
+    python3-pip \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-rosdep \
+    python3-vcstool \
+    python3-flake8-docstrings
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-ros-base \
     ros-humble-rmw-cyclonedds-cpp \
@@ -98,7 +101,7 @@ ENV LIBREALSENSE_SOURCE_DIR=/opt/librealsense
  
 RUN git clone \
     --depth 1 \
-    --branch ${LIBREALSENSE_VERSION} \
+    --branch master \
     https://github.com/IntelRealSense/librealsense.git \
     ${LIBREALSENSE_SOURCE_DIR}
  

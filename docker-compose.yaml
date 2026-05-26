@@ -1,101 +1,84 @@
-# A docker-compose must always start with the version tag. "3" is the latest version at this time.
-version: "3"
-# Use the keyword 'services' to start to define services.
-services:          # 1 service = 1 container.
-  network_service:
-    image: "realsense_ros_humble:latest"       # image name with the version
-    #container_name: Realsense_Network_Service
-    network_mode: "bridge"
-    environment:
-      ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-    tty: true
-
-  d435:
-    image: "realsense_ros_humble:latest"       # image name with the version
-    #container_name: Realsense_Camera_d435
-    environment:
-      DISPLAY: $DISPLAY
-      PATH: $PATH
-      NVIDIA_DRIVER_CAPABILITIES: all
-      QT_X11_NO_MITSHM: 1
-      ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
-      - /dev/bus/usb:/dev/bus/usb
-    device_cgroup_rules:
-      - 'c 189:* rmw'
-      - 'c 81:* rmw'
-    network_mode: "service:network_service"
+# =============================================================================
+# docker-compose.yml — RealSense + ROS2 Humble on Jetson AGX Orin
+#
+# Usage:
+#   Build image:          docker compose build
+#   Start shell:          docker compose run realsense_ros2
+#   Launch camera node:   docker compose run realsense_ros2 \
+#                           ros2 launch realsense2_camera rs_launch.py
+#   Multi-camera:         docker compose run realsense_ros2 \
+#                           ros2 launch realsense2_camera rs_multi_camera_launch.py
+# =============================================================================
+ 
+services:
+  realsense_ros2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        L4T_VERSION: "r36.3.0"
+        LIBREALSENSE_VERSION: "v2.55.1"
+        REALSENSE_ROS_VERSION: "4.55.1"
+ 
+    image: realsense-ros2-jetson:humble
+ 
+    # ── Networking ──────────────────────────────────────────────────────────
+    # host mode lets ROS2 DDS discovery work without extra config
+    network_mode: host
+ 
+    # ── Device access ───────────────────────────────────────────────────────
+    # privileged gives access to the host's patched kernel modules (uvcvideo)
+    # and all USB devices. Alternatively, replace with specific --device entries.
     privileged: true
-    tty: true
-    depends_on:
-      - network_service
-    command: bash /home/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD
-
-  d405:
-    image: "realsense_ros_humble:latest"       # image name with the version
-    #container_name: Realsense_Camera_d405
+ 
+    volumes:
+      # Full /dev — needed for USB cameras and V4L devices
+      - /dev:/dev
+      # udev rules (read-only is enough at runtime)
+      - /run/udev:/run/udev:ro
+      # Optional: persist ROS2 logs on the host
+      - ./ros2_logs:/root/.ros
+ 
     environment:
-      DISPLAY: $DISPLAY
-      PATH: $PATH
-      NVIDIA_DRIVER_CAPABILITIES: all
-      QT_X11_NO_MITSHM: 1
-      ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
-      - /dev/bus/usb:/dev/bus/usb
-    device_cgroup_rules:
-      - 'c 189:* rmw'
-      - 'c 81:* rmw'
-    network_mode: "service:network_service"
-    privileged: true
+      # ROS2
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      # Display forwarding (for rviz2 / rqt — requires `xhost +local:docker` on host)
+      - DISPLAY=${DISPLAY:-:0}
+      - XAUTHORITY=${XAUTHORITY:-}
+      # NVIDIA / CUDA
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+ 
+    # Interactive shell by default
+    stdin_open: true
     tty: true
-    depends_on:
-      - network_service
-    command: bash /home/realsense_d405_cam.sh $D405_SN $D405_NAME $D405_WIDTH $D405_HEIGHT
-
-  enumerate_devices:
-    image: "realsense_ros_humble:latest"       # image name with the version
-    container_name: Realsense_enumerate_devices
-    environment:
-      DISPLAY: $DISPLAY
-      PATH: $PATH
-      NVIDIA_DRIVER_CAPABILITIES: all
-      QT_X11_NO_MITSHM: 1
-      ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
-      - /dev/bus/usb:/dev/bus/usb
-    device_cgroup_rules:
-      - 'c 189:* rmw'
-      - 'c 81:* rmw'
-    network_mode: "service:network_service"
-    privileged: true
-    tty: true
-    command: rs-enumerate-devices
-
-  rqt_image_view:
-    image: "realsense_ros_humble:latest"       # image name with the version
-    container_name: RQT_image_view
-    environment:
-      DISPLAY: $DISPLAY
-      PATH: $PATH
-      NVIDIA_DRIVER_CAPABILITIES: all
-      QT_X11_NO_MITSHM: 1
-      ROS_DOMAIN_ID: $ROS_DOMAIN_ID
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
-      - /dev/bus/usb:/dev/bus/usb
-    device_cgroup_rules:
-      - 'c 189:* rmw'
-      - 'c 81:* rmw'
-    network_mode: "service:network_service"
-    privileged: true
-    tty: true
-    depends_on:
-      - network_service
-    command: ros2 run rqt_image_view rqt_image_view
+ 
+    # Restart policy — disable for development, enable for production
+    restart: "no"
+    runtime: nvidia
+    # ── Hardware accelerated rendering (for rviz2) ──────────────────────────
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu, compute, utility, video]
+ 
+# =============================================================================
+# NOTE: If you want to run multiple camera nodes simultaneously,
+# launch each as a separate service and override the camera serial number:
+#
+#   realsense_cam1:
+#     extends: realsense_ros2
+#     command: >
+#       ros2 launch realsense2_camera rs_launch.py
+#         serial_no:="_<SERIAL_1>" camera_namespace:=cam1
+#
+#   realsense_cam2:
+#     extends: realsense_ros2
+#     command: >
+#       ros2 launch realsense2_camera rs_launch.py
+#         serial_no:="_<SERIAL_2>" camera_namespace:=cam2
+# =============================================================================
