@@ -23,6 +23,15 @@ chmod +x 00_patch_host_kernel.sh
 ./00_patch_host_kernel.sh
 ```
 
+After this, check the output of the following commands:
+
+```bash
+modinfo -F filename uvcvideo # expected: /lib/modules/5.15.148-tegra/extra/uvcvideo.ko
+modinfo -F filename videodev # expected: /lib/modules/5.15.148-tegra/extra/videodev.ko
+```
+
+If those command output match the expectation the patch is in place.
+
 - Takes ~30 minutes (downloads kernel source, applies patches, inserts modules).
 - Requires ~2.5 GB free space and internet access.
 - Unplug all USB cameras before running.
