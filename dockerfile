@@ -20,7 +20,7 @@ FROM nvcr.io/nvidia/l4t-jetpack:${L4T_VERSION}
 # Keep ARG visible after FROM
 ARG L4T_VERSION=r36.3.0
  
-LABEL maintainer="your-team"
+LABEL maintainer="fischer"
 LABEL description="RealSense D-series + ROS2 Humble on Jetson AGX Orin (JetPack 6.0)"
 LABEL l4t_version=${L4T_VERSION}
  
