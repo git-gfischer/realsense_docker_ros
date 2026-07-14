@@ -1,18 +1,22 @@
+#!/usr/bin/env bash
 
-ROS_DOMAIN_ID=55
-RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-D435_SN=941322072804
-D435_WIDTH=640
-D435_HEIGHT=480
-D435_FPS=30
-D435_NAME=realsense/front/camera
-POINTCLOUD=False
+# Defaults — override via positional args or env vars (e.g. from .camera)
+SERIAL_NO="${1:-${D435_SN:-}}"
+CAMERA_NAMESPACE="${2:-${D435_NAME:-realsense/front/}}"
+WIDTH="${3:-${D435_WIDTH:-640}}"
+HEIGHT="${4:-${D435_HEIGHT:-480}}"
+POINTCLOUD_ENABLE="${5:-${POINT_CLOUD:-false}}"
+IMU_ENABLE="${6:-${IMU:-false}}"
 
-source /ros2_ws/install/setup.bash && \
-echo "RWM IMPLEMENTATION $RMW_IMPLEMENTATION"
-export RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION
-export ROS_DOMAIN_ID=$ROS_DOMAIN_ID
-
+source ~/.bashrc && \
+source /opt/ros/${ROS_DISTRO}/setup.bash && \
+echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID" && \
+echo "Serial number: $SERIAL_NO" && \
+echo "Camera namespace: $CAMERA_NAMESPACE" && \
+echo "Resolution: ${WIDTH}x${HEIGHT}" && \
+echo "Pointcloud enabled: $POINTCLOUD_ENABLE" && \
+echo "IMU enabled: $IMU_ENABLE" && \
+echo "RWM Implementation $RMW_IMPLEMENTATION" && \
 ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            enable_color:=true \
                                            enable_depth:=true \
@@ -20,29 +24,14 @@ ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            enable_rgbd:=true \
                                            enable_sync:=true \
                                            align_depth.enable:=true \
-                                           rgb_camera.color_profile:=${D435_WIDTH}x${D435_HEIGHT}x${D435_FPS} \
-                                           depth_module.depth_profile:=${D435_WIDTH}x${D435_HEIGHT}x${D435_FPS} \
-                                           depth_module.infra_profile:=${D435_WIDTH}x${D435_HEIGHT}x${D435_FPS} \
-                                           pointcloud.enable:=${POINTCLOUD} \
-                                           serial_no:="_${D435_SN}" \
-                                           camera_namespace:=${D435_NAME} \
-                                           pointcloud.stream_filter:=0 \
-                                           pointcloud.allow_no_texture_points:=false \
-                                           rgb_camera.enable_auto_exposure:=false
-                                        #    pointcloud.ordered_pc:=false
-# ros2 run realsense2_camera realsense2_camera_node --ros-args -p pointcloud.enable:=false \
-#                                                              -p enable_rgbd:=true \
-#                                                              -p enable_sync:=true \
-#                                                              -p align_depth.enable:=true \
-#                                                              -p initial_reset:=true \
-#                                                              -p enable_rgbd:=true \
-#                                                              -p enable_color:=true \
-#                                                              -p enable_depth:=true \
-#                                                             -p rgb_camera.color_profile:=640x480x15 \
-#                                                             -p depth_module.depth_profile:=640x480x15 \
-#                                                             -p depth_module.infra_profile:=640x480x15 \
-#                                                             -p camera_namespace:=realsense/front/
-                                                            #-p serial_no:="_$1" \
-                                                            #-p pointcloud.stream_filter:=RS2_STREAM_COLOR \
-                                                            #-p poincloud.allow_no_texture_points:=true \
-                                                            #-p pointcloud.ordered_pc:=false
+                                           enable_color:=true \
+                                           enable_depth:=true \
+                                           pointcloud.enable:=$POINTCLOUD_ENABLE \
+                                           rgb_camera.color_profile:="${WIDTH}x${HEIGHT}x30" \
+                                           depth_module.depth_profile:="${WIDTH}x${HEIGHT}x30" \
+                                           depth_module.infra_profile:="${WIDTH}x${HEIGHT}x30" \
+                                           serial_no:="_$SERIAL_NO" \
+                                           camera_namespace:="$CAMERA_NAMESPACE" \
+                                           enable_gyro:=$IMU_ENABLE \
+                                           enable_accel:=$IMU_ENABLE \
+                                           unite_imu_method:=linear_interpolation

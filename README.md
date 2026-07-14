@@ -55,6 +55,52 @@ Build time: ~20–40 min (compiles librealsense + realsense-ros from source).
 
 ## Step 3 — Run
 
+### Launch camera node with `docker compose up`
+
+The compose file is configured to start the D435 camera node automatically via `realsense_d435_cam.sh`. Settings are loaded from `.camera`:
+
+```bash
+# .camera
+ROS_DOMAIN_ID=1
+RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+D435_SN=              # leave empty to use the first detected camera
+D435_WIDTH=640
+D435_HEIGHT=480
+D435_NAME=realsense/front/
+POINT_CLOUD=false
+IMU=false
+```
+
+Edit `.camera` as needed, then start the node:
+
+```bash
+# Foreground (logs in this terminal; Ctrl+C to stop)
+docker compose up
+
+# Detached (runs in background)
+docker compose up -d
+
+# Stop and remove the container
+docker compose down
+```
+
+If you have multiple cameras, set `D435_SN` to the serial number (find it with `rs-enumerate-devices -s` on the host or inside the container).
+
+You can also override settings for a single run without editing `.camera`:
+
+```bash
+D435_SN=123456789 D435_WIDTH=1280 D435_HEIGHT=720 POINT_CLOUD=true docker compose up
+```
+
+The launch script uses built-in defaults when a value is not set; anything in `.camera` or passed on the command line takes precedence.
+
+Published topics appear under the namespace set by `D435_NAME`, for example:
+
+```bash
+ros2 topic list | grep realsense
+ros2 topic echo /realsense/front/color/image_raw/compressed
+```
+
 ### Interactive shell
 ```bash
 docker compose run realsense_ros2
