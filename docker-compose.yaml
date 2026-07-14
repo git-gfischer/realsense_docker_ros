@@ -23,7 +23,7 @@ services:
     image: realsense-ros2-jetson:humble
     env_file: .camera
     # ── Networking ──────────────────────────────────────────────────────────
-    # host mode lets ROS2 DDS discovery work without extra config
+    # host mode let ROS2 DDS discovery work without extra config
     network_mode: host
  
     # ── Device access ───────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ services:
       - /run/udev:/run/udev:ro
       # Optional: persist ROS2 logs on the host
       - ./ros2_logs:/root/.ros
-      - ../realsense_d435_cam.sh:/realsense_d435_cam.sh
+      - ./realsense_d435_cam.sh:/ros2_ws/realsense_d435_cam.sh
  
     environment:
       # Display forwarding (for rviz2 / rqt — requires `xhost +local:docker` on host)
@@ -55,7 +55,7 @@ services:
     # Restart policy — disable for development, enable for production
     restart: "no"
     runtime: nvidia
-    command: [/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU]
+    command: "bash /ros2_ws/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU"
     # ── Hardware accelerated rendering (for rviz2) ──────────────────────────
     # deploy:
     #   resources:

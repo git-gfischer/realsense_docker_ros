@@ -155,6 +155,28 @@ xhost +local:docker
 ```
 Then launch rviz2 from inside the container normally.
 
+### Enabling point cloud from Realsense camera node:
+Launch the camera ros node with:
+```
+ros2 launch realsense2_camera rs_launch.py \
+depth_module.depth_profile:=640x480x30 \
+rgb_camera.color_profile:=640x480x30 \
+pointcloud__neon_.enable:=true \
+align_depth.enable:=true
+```
+Then in another terminal:
+```
+ros2 param set /camera/camera pointcloud__neon_.enable true
+```
+Check if the parameter has been correctly set with:
+```
+ros2 param get /camera/camera pointcloud__neon_.enable
+```
+You should see: `Boolean value is: True`
+
+Check the topic list. You should see the topic `/camera/camera/depth/color/points`
+
+
 ---
 
 ## Version matrix
