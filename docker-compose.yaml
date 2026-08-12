@@ -55,7 +55,9 @@ services:
     # Restart policy — disable for development, enable for production
     restart: "no"
     runtime: nvidia
-    command: "bash /ros2_ws/realsense_d435_cam.sh $D435_SN $D435_NAME $D435_WIDTH $D435_HEIGHT $POINT_CLOUD $IMU"
+    # Let the script read values from the container environment loaded via
+    # `env_file`; Compose would otherwise expand $VARS on the host side.
+    command: ["bash", "/ros2_ws/realsense_d435_cam.sh"]
     # ── Hardware accelerated rendering (for rviz2) ──────────────────────────
     # deploy:
     #   resources:
