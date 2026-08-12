@@ -8,15 +8,22 @@ HEIGHT="${4:-${D435_HEIGHT:-480}}"
 POINTCLOUD_ENABLE="${5:-${POINT_CLOUD:-false}}"
 IMU_ENABLE="${6:-${IMU:-false}}"
 
-source ~/.bashrc && \
-source /opt/ros/${ROS_DISTRO}/setup.bash && \
-echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID" && \
-echo "Serial number: $SERIAL_NO" && \
-echo "Camera namespace: $CAMERA_NAMESPACE" && \
-echo "Resolution: ${WIDTH}x${HEIGHT}" && \
-echo "Pointcloud enabled: $POINTCLOUD_ENABLE" && \
-echo "IMU enabled: $IMU_ENABLE" && \
-echo "RWM Implementation $RMW_IMPLEMENTATION" && \
+source ~/.bashrc
+source /opt/ros/${ROS_DISTRO}/setup.bash
+set -euo pipefail
+
+echo "ROS_DOMAIN_ID $ROS_DOMAIN_ID"
+echo "Serial number: $SERIAL_NO"
+echo "Camera namespace: $CAMERA_NAMESPACE"
+echo "Resolution: ${WIDTH}x${HEIGHT}"
+echo "Pointcloud enabled: $POINTCLOUD_ENABLE"
+echo "IMU enabled: $IMU_ENABLE"
+echo "RWM Implementation $RMW_IMPLEMENTATION"
+
+CAMERA_NAMESPACE_CLEAN="${CAMERA_NAMESPACE#/}"
+CAMERA_NAMESPACE_CLEAN="${CAMERA_NAMESPACE_CLEAN%/}"
+CAMERA_NODE="/${CAMERA_NAMESPACE_CLEAN}/camera"
+
 ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            enable_color:=true \
                                            enable_depth:=true \
@@ -34,4 +41,18 @@ ros2 launch realsense2_camera rs_launch.py initial_reset:=true \
                                            camera_namespace:="$CAMERA_NAMESPACE" \
                                            enable_gyro:=$IMU_ENABLE \
                                            enable_accel:=$IMU_ENABLE \
-                                           unite_imu_method:=linear_interpolation
+                                           unite_imu_method:=linear_interpolation &
+LAUNCH_PID=$!
+
+if [[ "${POINTCLOUD_ENABLE,,}" == "true" ]]; then
+  for _ in $(seq 1 30); do
+    if ros2 param get "$CAMERA_NODE" pointcloud__neon_.enable >/dev/null 2>&1; then
+      echo "Enabling pointcloud runtime parameter on $CAMERA_NODE"
+      ros2 param set "$CAMERA_NODE" pointcloud__neon_.enable true || true
+      break
+    fi
+    sleep 1
+  done
+fi
+
+wait "$LAUNCH_PID"
