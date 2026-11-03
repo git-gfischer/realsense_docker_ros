@@ -166,6 +166,9 @@ services:          # 1 service = 1 container.
     privileged: true
     tty: true
     volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # Wayland sessions keep the X cookie in $XAUTHORITY, not ~/.Xauthority
+      - ${XAUTHORITY:-~/.Xauthority}:/root/.Xauthority
       - ./rgbd_collector.py:/home/rgbd_collector.py
       - ./rosbags:/home/rosbags
     depends_on:

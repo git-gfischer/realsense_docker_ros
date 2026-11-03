@@ -318,6 +318,8 @@ class RGBDSyncNode(Node):
     def __init__(self) -> None:
         super().__init__("rgbd_sync_node")
         self._dataset_writer: Optional[SlamDatasetWriter] = None
+        # Last synced color frame, read by the preview window in the main thread
+        self.latest_color: Optional[Image] = None
 
         # Parameters for input topics. The camera launch publishes under /<CAMERA_NAMESPACE>/camera.
         # Depth is aligned to color, so SLAM can pair it with the color intrinsics.
@@ -372,6 +374,7 @@ class RGBDSyncNode(Node):
         self.pub_depth.publish(depth_msg)
         self.pub_color_info.publish(color_info_msg)
         self.pub_depth_info.publish(depth_info_msg)
+        self.latest_color = color_msg
         if self._dataset_writer is not None:
             self._dataset_writer.write(color_msg, depth_msg, color_info_msg, depth_info_msg)
 
@@ -569,6 +572,23 @@ class RGBDBagPlayer(Node):
         response.message = "Stopped bag play."
         return response
 
+
+def show_rgb(node: RGBDSyncNode) -> None:
+    # OpenCV windows must be driven from one thread, so this runs in the main thread.
+    window = "RGBD collector - RGB"
+    while rclpy.ok():
+        msg = node.latest_color
+        if msg is not None:
+            try:
+                cv2.imshow(window, color_for_png(msg))
+            except cv2.error as exc:
+                # No usable display: keep collecting without the preview.
+                node.get_logger().warning(f"RGB preview disabled: {exc}")
+                return
+        cv2.waitKey(30)
+    cv2.destroyAllWindows()
+
+
 def main() -> None:
     rclpy.init(args=None)
 
@@ -593,8 +613,12 @@ def main() -> None:
     executor.add_node(bag_node)
     executor.add_node(play_node)
 
+    spin_thread = threading.Thread(target=executor.spin, daemon=True)
+    spin_thread.start()
     try:
-        executor.spin()
+        if os.environ.get("DISPLAY"):
+            show_rgb(sync_node)
+        spin_thread.join()
     finally:
         # Ensure recording is stopped cleanly when the node/container shuts down
         if writer is not None:
