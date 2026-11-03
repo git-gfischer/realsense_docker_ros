@@ -169,7 +169,7 @@ services:          # 1 service = 1 container.
       - ./rosbags:/home/rosbags
     depends_on:
       - d4XX
-    command: bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && python3 /home/rgbd_collector.py"
+    command: bash -c "source /opt/ros/$${ROS_DISTRO}/setup.bash && python3 /home/rgbd_collector.py"
 
   enter:
     build:
