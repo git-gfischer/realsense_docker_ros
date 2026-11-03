@@ -66,9 +66,9 @@ docker compose run rviz
 ```
 
 ## Collect images
-Records a rosbag of the synced color, depth, and camera info topics into `rosbags/rgbd_bag_<timestamp>/`.
+Records a rosbag of the synced color, aligned depth, and camera info topics into `rosbags/rgbd_bag_<timestamp>/`. Pass the same env file as the camera: it starts `d4XX` too and subscribes to `/<D4XX_NAME>/camera/...`.
 ```
-docker compose up rgbd_collector
+docker compose --env-file <.ENV_FILE> up rgbd_collector
 ```
 
 To record a SLAM dataset instead of a rosbag, add this to `.ros_env` and run the same command:

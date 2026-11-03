@@ -319,11 +319,14 @@ class RGBDSyncNode(Node):
         super().__init__("rgbd_sync_node")
         self._dataset_writer: Optional[SlamDatasetWriter] = None
 
-        # Parameters for input topics
-        self.declare_parameter("color_topic", "/camera/color/image_raw")
-        self.declare_parameter("depth_topic", "/camera/depth/image_rect_raw")
-        self.declare_parameter("color_info_topic", "/camera/color/camera_info")
-        self.declare_parameter("depth_info_topic", "/camera/depth/camera_info")
+        # Parameters for input topics. The camera launch publishes under /<CAMERA_NAMESPACE>/camera.
+        # Depth is aligned to color, so SLAM can pair it with the color intrinsics.
+        namespace = os.environ.get("CAMERA_NAMESPACE", "").strip("/")
+        prefix = f"/{namespace}/camera" if namespace else "/camera"
+        self.declare_parameter("color_topic", f"{prefix}/color/image_raw")
+        self.declare_parameter("depth_topic", f"{prefix}/aligned_depth_to_color/image_raw")
+        self.declare_parameter("color_info_topic", f"{prefix}/color/camera_info")
+        self.declare_parameter("depth_info_topic", f"{prefix}/aligned_depth_to_color/camera_info")
 
         color_topic = self.get_parameter("color_topic").get_parameter_value().string_value
         depth_topic = self.get_parameter("depth_topic").get_parameter_value().string_value
